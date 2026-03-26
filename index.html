@@ -188,24 +188,7 @@ body{
 
   <div class="sec">
     <div class="sec-title">メニューを選ぶ</div>
-    <div class="menu-grid">
-      <div class="menu-card" data-menu="ジェルネイル" data-min="60" data-price="¥5,000" onclick="selMenu(this)">
-        <div><div class="mc-name">ジェルネイル</div><div class="mc-meta"><span>⏱ 60分</span><span class="tag">人気No.1</span></div></div>
-        <div class="mc-right"><div class="mc-price">¥5,000</div><div class="mc-check">✓</div></div>
-      </div>
-      <div class="menu-card" data-menu="ジェル＋オフあり" data-min="90" data-price="¥6,500" onclick="selMenu(this)">
-        <div><div class="mc-name">ジェル＋オフあり</div><div class="mc-meta"><span>⏱ 90分</span></div></div>
-        <div class="mc-right"><div class="mc-price">¥6,500</div><div class="mc-check">✓</div></div>
-      </div>
-      <div class="menu-card" data-menu="スカルプ" data-min="120" data-price="¥9,000" onclick="selMenu(this)">
-        <div><div class="mc-name">スカルプ</div><div class="mc-meta"><span>⏱ 120分</span><span class="tag">本格派</span></div></div>
-        <div class="mc-right"><div class="mc-price">¥9,000</div><div class="mc-check">✓</div></div>
-      </div>
-      <div class="menu-card" data-menu="オフのみ" data-min="30" data-price="¥2,000" onclick="selMenu(this)">
-        <div><div class="mc-name">オフのみ</div><div class="mc-meta"><span>⏱ 30分</span></div></div>
-        <div class="mc-right"><div class="mc-price">¥2,000</div><div class="mc-check">✓</div></div>
-      </div>
-    </div>
+    <div class="menu-grid" id="menu-grid"></div>
   </div>
 
   <div class="sec">
@@ -254,6 +237,40 @@ const MODE = "hybrid";
 
 let selMenuName='', selMenuMin=0, selMenuPrice='';
 let selDate='', selDateLabel='', selTime='';
+
+// メニュー動的生成（localStorageから読み込み、なければデフォルト）
+const DEFAULT_MENUS_CLIENT = [
+  { id:1, name:'ジェルネイル',    price:'¥5,000', min:60,  badge:'人気No.1' },
+  { id:2, name:'ジェル＋オフあり',price:'¥6,500', min:90,  badge:''         },
+  { id:3, name:'スカルプ',        price:'¥9,000', min:120, badge:'おすすめ'  },
+  { id:4, name:'オフのみ',        price:'¥2,000', min:30,  badge:''         },
+];
+function buildMenus() {
+  const menus = JSON.parse(localStorage.getItem('menus') || 'null') || DEFAULT_MENUS_CLIENT;
+  const grid = document.getElementById('menu-grid');
+  grid.innerHTML = '';
+  menus.forEach(m => {
+    const card = document.createElement('div');
+    card.className = 'menu-card';
+    card.dataset.menu  = m.name;
+    card.dataset.min   = m.min;
+    card.dataset.price = m.price;
+    card.innerHTML = `
+      <div>
+        <div class="mc-name">${m.name}</div>
+        <div class="mc-meta">
+          <span>⏱ ${m.min}分</span>
+          ${m.badge ? `<span class="tag">${m.badge}</span>` : ''}
+        </div>
+      </div>
+      <div class="mc-right">
+        <div class="mc-price">${m.price}</div>
+        <div class="mc-check">✓</div>
+      </div>`;
+    card.onclick = () => selMenu(card);
+    grid.appendChild(card);
+  });
+}
 
 // 日付ボタン生成
 function buildDateBtns() {
@@ -378,6 +395,7 @@ function doSubmit() {
   }, 850);
 }
 
+buildMenus();
 buildDateBtns();
 buildTimeBtns();
 </script>

@@ -25,10 +25,61 @@ body{
   font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif;
   background:#f4f0f2;
   color:var(--ink);
-  max-width:480px;
-  margin:0 auto;
   min-height:100vh;
+}
+
+/* ===== PC レイアウト ===== */
+.layout{
+  max-width:960px;
+  margin:0 auto;
   padding-bottom:48px;
+}
+
+/* PC: 2カラム（サイドバー＋メイン） */
+@media (min-width: 768px) {
+  .hd{ padding:20px 32px 16px; }
+  .nav{ padding:0 32px; }
+  .pc-cols{
+    display:grid;
+    grid-template-columns:220px 1fr;
+    gap:24px;
+    padding:24px 32px 0;
+    align-items:start;
+  }
+  /* サイドバー：タブをverticalに */
+  .nav{ display:none; } /* 横ナビ非表示 */
+  .sidebar{
+    display:flex;flex-direction:column;gap:4px;
+    background:#fff;border-radius:14px;
+    padding:12px;
+    box-shadow:0 2px 12px rgba(58,42,48,.07);
+    position:sticky;top:20px;
+  }
+  .sidebar-btn{
+    display:block;width:100%;
+    padding:12px 14px;
+    font-size:13px;font-weight:700;
+    background:none;border:none;
+    color:var(--muted);text-align:left;
+    border-radius:10px;cursor:pointer;
+    transition:all .15s;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .sidebar-btn:hover{background:#faf7f8;}
+  .sidebar-btn.active{background:var(--rose-l);color:var(--rose-d);}
+  .main-area{ min-width:0; }
+  .sec{ padding:0 0 0; }
+  .sec-hd{ padding-top:0; }
+  .summary-grid{ padding:0 0 16px; }
+}
+
+/* スマホ：従来通り */
+@media (max-width: 767px) {
+  .layout{ max-width:480px;margin:0 auto; }
+  .sidebar{ display:none; }
+  .pc-cols{ display:block; }
+  .sec{ padding:16px 16px 0; }
+  .summary-grid{ padding:16px; }
 }
 
 /* ===== HEADER ===== */
@@ -124,11 +175,40 @@ body{
 .menu-row{
   padding:14px 16px;
   display:flex;align-items:center;gap:12px;
+  transition:background .15s;
+  cursor:default;
 }
+.menu-row.dragging{
+  opacity:.4;background:#faf7f8;
+}
+.menu-row.drag-over{
+  background:var(--rose-l);
+  border-top:2px solid var(--rose-d);
+}
+.drag-handle{
+  font-size:16px;color:var(--border);
+  cursor:grab;flex-shrink:0;
+  user-select:none;touch-action:none;
+  padding:4px 2px;
+}
+.drag-handle:active{cursor:grabbing;}
 .menu-row-info{flex:1;}
 .menu-row-name{font-size:14px;font-weight:800;margin-bottom:2px;}
 .menu-row-meta{font-size:11px;color:var(--muted);}
-.menu-row-price{font-size:15px;font-weight:800;color:var(--rose-d);flex-shrink:0;}
+/* 価格インライン編集 */
+.menu-row-price{
+  font-size:15px;font-weight:800;color:var(--rose-d);flex-shrink:0;
+  cursor:pointer;border-bottom:1px dashed transparent;
+  transition:border-color .15s;padding-bottom:1px;
+}
+.menu-row-price:hover{border-bottom-color:var(--rose-d);}
+.price-input{
+  width:90px;font-size:14px;font-weight:800;color:var(--rose-d);
+  border:2px solid var(--rose);border-radius:6px;
+  padding:3px 7px;font-family:inherit;
+  background:#fff;text-align:right;
+}
+.price-input:focus{outline:none;}
 .del-btn{
   width:28px;height:28px;border-radius:50%;
   background:var(--red-l);color:var(--red);
@@ -227,6 +307,7 @@ body{
 </style>
 </head>
 <body>
+<div class="layout">
 
 <!-- HEADER -->
 <div class="hd">
@@ -237,99 +318,110 @@ body{
   <div class="hd-sub" id="hd-date"></div>
 </div>
 
-<!-- NAV -->
+<!-- スマホ用横ナビ -->
 <div class="nav">
   <button class="nav-btn active" onclick="switchTab('reserve',this)">📋 予約一覧</button>
   <button class="nav-btn" onclick="switchTab('menu',this)">🍽 メニュー管理</button>
   <button class="nav-btn" onclick="switchTab('coupon',this)">🎁 クーポン管理</button>
 </div>
 
-<!-- =====================
-     TAB: 予約一覧
-     ===================== -->
-<div class="tab active" id="tab-reserve">
+<!-- PC用2カラム -->
+<div class="pc-cols">
 
-  <!-- サマリー -->
-  <div class="summary-grid">
-    <div class="summary-item">
-      <div class="summary-num" id="sum-total">0</div>
-      <div class="summary-lbl">全予約</div>
-    </div>
-    <div class="summary-item">
-      <div class="summary-num" id="sum-pending" style="color:var(--rose-d)">0</div>
-      <div class="summary-lbl">仮予約</div>
-    </div>
-    <div class="summary-item">
-      <div class="summary-num" id="sum-confirmed" style="color:var(--green)">0</div>
-      <div class="summary-lbl">確定済</div>
-    </div>
+  <!-- PC用サイドバー -->
+  <div class="sidebar">
+    <button class="sidebar-btn active" onclick="switchTab('reserve',this)">📋 予約一覧</button>
+    <button class="sidebar-btn" onclick="switchTab('menu',this)">🍽 メニュー管理</button>
+    <button class="sidebar-btn" onclick="switchTab('coupon',this)">🎁 クーポン管理</button>
   </div>
 
-  <div class="sec">
-    <div class="sec-hd">
-      <div class="sec-title">予約一覧</div>
-      <div style="display:flex;align-items:center;gap:12px;">
-        <label style="display:flex;align-items:center;gap:5px;font-size:11px;font-weight:700;color:var(--muted);cursor:pointer;">
-          <input type="checkbox" id="show-cancelled" style="accent-color:var(--muted);width:14px;height:14px;" onchange="renderReserves()">
-          取消も表示
-        </label>
-        <label style="display:flex;align-items:center;gap:5px;font-size:11px;font-weight:700;color:var(--muted);cursor:pointer;">
-          <input type="checkbox" id="check-all" style="accent-color:var(--green);width:14px;height:14px;" onchange="confirmAll(this.checked)">
-          すべて確定
-        </label>
-      </div>
-    </div>
-    <div class="card" id="reserve-list"></div>
-  </div>
+  <!-- メインエリア -->
+  <div class="main-area">
 
-</div>
-
-<!-- =====================
-     TAB: メニュー管理
-     ===================== -->
-<div class="tab" id="tab-menu">
-  <div class="sec">
-    <div class="sec-hd">
-      <div class="sec-title">メニュー一覧</div>
-      <div class="hint">下のフォームから追加できます</div>
-    </div>
-    <div class="card">
-      <div id="menu-list"></div>
-      <!-- 追加フォーム -->
-      <div class="add-form">
-        <div class="add-form-title">＋ メニューを追加</div>
-        <div class="add-row">
-          <input class="add-input" id="new-menu-name" placeholder="メニュー名">
-          <input class="add-input" id="new-menu-price" placeholder="¥0,000">
-          <input class="add-input" id="new-menu-min" placeholder="分" type="number">
+    <!-- TAB: 予約一覧 -->
+    <div class="tab active" id="tab-reserve">
+      <div class="summary-grid">
+        <div class="summary-item">
+          <div class="summary-num" id="sum-total">0</div>
+          <div class="summary-lbl">全予約</div>
         </div>
-        <button class="add-btn" onclick="addMenu()">追加する</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- =====================
-     TAB: クーポン管理
-     ===================== -->
-<div class="tab" id="tab-coupon">
-  <div class="sec">
-    <div class="sec-hd">
-      <div class="sec-title">クーポン一覧</div>
-    </div>
-    <div class="card">
-      <div id="coupon-list"></div>
-      <div class="add-form">
-        <div class="add-form-title">＋ クーポンを追加</div>
-        <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:8px;">
-          <input class="add-input" id="new-coupon-name"   placeholder="クーポン名（例：紹介割 500円OFF）">
-          <input class="add-input" id="new-coupon-detail" placeholder="説明（例：お友達紹介のお客様に適用）">
+        <div class="summary-item">
+          <div class="summary-num" id="sum-pending" style="color:var(--rose-d)">0</div>
+          <div class="summary-lbl">未確定</div>
         </div>
-        <button class="add-btn" onclick="addCoupon()">追加する</button>
+        <div class="summary-item">
+          <div class="summary-num" id="sum-confirmed" style="color:var(--green)">0</div>
+          <div class="summary-lbl">確定済</div>
+        </div>
+      </div>
+      <div class="sec">
+        <div class="sec-hd">
+          <div class="sec-title">予約一覧</div>
+          <div style="display:flex;align-items:center;gap:12px;">
+            <label style="display:flex;align-items:center;gap:5px;font-size:11px;font-weight:700;color:var(--muted);cursor:pointer;">
+              <input type="checkbox" id="show-cancelled" style="accent-color:var(--muted);width:14px;height:14px;" onchange="renderReserves()">
+              取消も表示
+            </label>
+            <label style="display:flex;align-items:center;gap:5px;font-size:11px;font-weight:700;color:var(--muted);cursor:pointer;">
+              <input type="checkbox" id="check-all" style="accent-color:var(--green);width:14px;height:14px;" onchange="confirmAll(this.checked)">
+              すべて確定
+            </label>
+          </div>
+        </div>
+        <div class="card" id="reserve-list"></div>
       </div>
     </div>
-  </div>
-</div>
+
+    <!-- TAB: メニュー管理 -->
+    <div class="tab" id="tab-menu">
+      <div class="sec">
+        <div class="sec-hd">
+          <div class="sec-title">メニュー一覧</div>
+          <div class="hint">下のフォームから追加できます</div>
+        </div>
+        <div class="card">
+          <div id="menu-list"></div>
+          <div class="add-form">
+            <div class="add-form-title">＋ メニューを追加</div>
+            <div class="add-row">
+              <input class="add-input" id="new-menu-name" placeholder="メニュー名">
+              <input class="add-input" id="new-menu-price" placeholder="¥0,000">
+              <input class="add-input" id="new-menu-min" placeholder="分" type="number">
+            </div>
+            <select class="add-input" id="new-menu-badge" style="margin-bottom:8px;">
+              <option value="">バッジなし</option>
+              <option value="人気No.1">人気No.1</option>
+              <option value="おすすめ">おすすめ</option>
+            </select>
+            <button class="add-btn" onclick="addMenu()">追加する</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: クーポン管理 -->
+    <div class="tab" id="tab-coupon">
+      <div class="sec">
+        <div class="sec-hd">
+          <div class="sec-title">クーポン一覧</div>
+        </div>
+        <div class="card">
+          <div id="coupon-list"></div>
+          <div class="add-form">
+            <div class="add-form-title">＋ クーポンを追加</div>
+            <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:8px;">
+              <input class="add-input" id="new-coupon-name"   placeholder="クーポン名（例：紹介割 500円OFF）">
+              <input class="add-input" id="new-coupon-detail" placeholder="説明（例：お友達紹介のお客様に適用）">
+            </div>
+            <button class="add-btn" onclick="addCoupon()">追加する</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /main-area -->
+</div><!-- /pc-cols -->
+</div><!-- /layout -->
 
 <script>
 // ===== 今日の日付 =====
@@ -347,10 +439,10 @@ const DEFAULT_RESERVATIONS = [
   { id:5, menu:'オフのみ',        date:'2026-03-25', time:'10:00', duration:'30分',  note:'',                   status:'confirmed' },
 ];
 const DEFAULT_MENUS = [
-  { id:1, name:'ジェルネイル',    price:'¥5,000', min:60  },
-  { id:2, name:'ジェル＋オフあり',price:'¥6,500', min:90  },
-  { id:3, name:'スカルプ',        price:'¥9,000', min:120 },
-  { id:4, name:'オフのみ',        price:'¥2,000', min:30  },
+  { id:1, name:'ジェルネイル',    price:'¥5,000', min:60,  badge:'人気No.1' },
+  { id:2, name:'ジェル＋オフあり',price:'¥6,500', min:90,  badge:''         },
+  { id:3, name:'スカルプ',        price:'¥9,000', min:120, badge:'おすすめ'  },
+  { id:4, name:'オフのみ',        price:'¥2,000', min:30,  badge:''         },
 ];
 const DEFAULT_COUPONS = [
   { id:1, name:'初回限定 20%OFF', detail:'初めてのお客様のみ',       active:true  },
@@ -505,27 +597,148 @@ function renderMenus() {
     list.innerHTML = '<div class="empty">メニューがありません</div>'; return;
   }
   list.innerHTML = menus.map((m,i) => `
-    <div class="menu-row">
+    <div class="menu-row" draggable="true" data-id="${m.id}">
+      <div class="drag-handle" title="ドラッグして並び替え">⠿</div>
       <div class="menu-row-info">
-        <div class="menu-row-name">${m.name}</div>
+        <div class="menu-row-name">
+          ${m.name}
+          ${m.badge ? `<span style="font-size:9px;font-weight:700;background:var(--rose-d);color:#fff;border-radius:4px;padding:2px 6px;margin-left:6px;">${m.badge}</span>` : ''}
+        </div>
         <div class="menu-row-meta">⏱ ${m.min}分</div>
       </div>
-      <div class="menu-row-price">${m.price}</div>
+      <div class="menu-row-price" onclick="startPriceEdit(${m.id}, this)" title="クリックで編集">${m.price}</div>
+      <select class="add-input" style="width:80px;padding:4px 6px;font-size:11px;" onchange="updateBadge(${m.id},this.value)">
+        <option value=""         ${!m.badge            ?'selected':''}>なし</option>
+        <option value="人気No.1" ${m.badge==='人気No.1'?'selected':''}>人気No.1</option>
+        <option value="おすすめ" ${m.badge==='おすすめ' ?'selected':''}>おすすめ</option>
+      </select>
       <button class="del-btn" onclick="delMenu(${m.id})">×</button>
     </div>
     ${i < menus.length-1 ? '<div class="divider"></div>' : ''}
   `).join('');
+  initDnD();
+}
+
+// ===== 価格インライン編集 =====
+function startPriceEdit(id, el) {
+  const m = menus.find(m=>m.id===id);
+  if (!m) return;
+  const input = document.createElement('input');
+  input.className = 'price-input';
+  input.value = m.price;
+  el.replaceWith(input);
+  input.focus(); input.select();
+  function commit() {
+    const val = input.value.trim() || m.price;
+    m.price = val;
+    save('menus', menus);
+    renderMenus();
+  }
+  input.addEventListener('blur', commit);
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter') { input.blur(); }
+    if (e.key === 'Escape') { m.price = m.price; renderMenus(); }
+  });
+}
+
+// ===== ドラッグ&ドロップ =====
+let dragSrcId = null;
+
+function initDnD() {
+  const rows = document.querySelectorAll('.menu-row[draggable]');
+  rows.forEach(row => {
+    // PC: drag events
+    row.addEventListener('dragstart', e => {
+      dragSrcId = parseInt(row.dataset.id);
+      row.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+    });
+    row.addEventListener('dragend', () => {
+      row.classList.remove('dragging');
+      document.querySelectorAll('.menu-row').forEach(r => r.classList.remove('drag-over'));
+    });
+    row.addEventListener('dragover', e => {
+      e.preventDefault();
+      document.querySelectorAll('.menu-row').forEach(r => r.classList.remove('drag-over'));
+      row.classList.add('drag-over');
+    });
+    row.addEventListener('drop', e => {
+      e.preventDefault();
+      const targetId = parseInt(row.dataset.id);
+      if (dragSrcId === targetId) return;
+      const srcIdx = menus.findIndex(m=>m.id===dragSrcId);
+      const tgtIdx = menus.findIndex(m=>m.id===targetId);
+      const [moved] = menus.splice(srcIdx, 1);
+      menus.splice(tgtIdx, 0, moved);
+      save('menus', menus);
+      renderMenus();
+    });
+
+    // スマホ: touch events（長押し→ドラッグ）
+    let touchTimer = null, touchSrcId = null, clone = null;
+    const handle = row.querySelector('.drag-handle');
+    handle.addEventListener('touchstart', e => {
+      touchTimer = setTimeout(() => {
+        touchSrcId = parseInt(row.dataset.id);
+        row.classList.add('dragging');
+        // クローン作成
+        clone = row.cloneNode(true);
+        clone.style.cssText = `position:fixed;opacity:.7;pointer-events:none;z-index:9999;width:${row.offsetWidth}px;background:#fff;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.15);`;
+        document.body.appendChild(clone);
+      }, 400);
+    }, {passive:true});
+    handle.addEventListener('touchmove', e => {
+      if (!clone) return;
+      e.preventDefault();
+      const t = e.touches[0];
+      clone.style.left = (t.clientX - clone.offsetWidth/2) + 'px';
+      clone.style.top  = (t.clientY - 30) + 'px';
+      // ターゲット検出
+      clone.style.display = 'none';
+      const el = document.elementFromPoint(t.clientX, t.clientY);
+      clone.style.display = '';
+      const targetRow = el?.closest('.menu-row[draggable]');
+      document.querySelectorAll('.menu-row').forEach(r=>r.classList.remove('drag-over'));
+      if (targetRow) targetRow.classList.add('drag-over');
+    }, {passive:false});
+    handle.addEventListener('touchend', e => {
+      clearTimeout(touchTimer);
+      if (!clone) return;
+      const t = e.changedTouches[0];
+      clone.remove(); clone = null;
+      row.classList.remove('dragging');
+      document.querySelectorAll('.menu-row').forEach(r=>r.classList.remove('drag-over'));
+      const el = document.elementFromPoint(t.clientX, t.clientY);
+      const targetRow = el?.closest('.menu-row[draggable]');
+      if (!targetRow || !touchSrcId) return;
+      const targetId = parseInt(targetRow.dataset.id);
+      if (touchSrcId === targetId) return;
+      const srcIdx = menus.findIndex(m=>m.id===touchSrcId);
+      const tgtIdx = menus.findIndex(m=>m.id===targetId);
+      const [moved] = menus.splice(srcIdx, 1);
+      menus.splice(tgtIdx, 0, moved);
+      save('menus', menus);
+      renderMenus();
+      touchSrcId = null;
+    });
+  });
+}
+function updateBadge(id, val) {
+  const m = menus.find(m=>m.id===id);
+  if (m) { m.badge = val; save('menus', menus); renderMenus(); }
 }
 function addMenu() {
   const name  = document.getElementById('new-menu-name').value.trim();
   const price = document.getElementById('new-menu-price').value.trim();
   const min   = parseInt(document.getElementById('new-menu-min').value);
-  if (!name || !price || !min) { alert('すべて入力してください'); return; }
-  menus.push({ id:Date.now(), name, price, min });
+  const badge = document.getElementById('new-menu-badge').value;
+  if (!name || !price || !min) { alert('名前・価格・時間を入力してください'); return; }
+  menus.push({ id:Date.now(), name, price, min, badge });
   save('menus', menus);
   document.getElementById('new-menu-name').value  = '';
   document.getElementById('new-menu-price').value = '';
   document.getElementById('new-menu-min').value   = '';
+  document.getElementById('new-menu-badge').value = '';
   renderMenus();
 }
 function delMenu(id) {
@@ -579,9 +792,14 @@ function delCoupon(id) {
 // ===== タブ切替 =====
 function switchTab(id, btn) {
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.nav-btn, .sidebar-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById('tab-'+id).classList.add('active');
   btn.classList.add('active');
+  // サイドバー・横ナビ両方を同期
+  const allBtns = document.querySelectorAll('.nav-btn, .sidebar-btn');
+  allBtns.forEach(b => {
+    if (b.getAttribute('onclick') === `switchTab('${id}',this)`) b.classList.add('active');
+  });
 }
 
 // ===== 初期化 =====
