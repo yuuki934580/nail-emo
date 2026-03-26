@@ -14,16 +14,8 @@ body {
   padding: 20px;
 }
 
-h1 {
-  font-size: 22px;
-  margin-bottom: 5px;
-}
-
-.sub {
-  color: #777;
-  font-size: 14px;
-  margin-bottom: 20px;
-}
+h1 { font-size: 22px; margin-bottom: 5px; }
+.sub { color: #777; font-size: 14px; margin-bottom: 20px; }
 
 .card {
   background: white;
@@ -34,21 +26,18 @@ h1 {
 
 button {
   width: 90%;
-  padding: 15px;
-  margin: 10px 0;
-  font-size: 16px;
+  padding: 14px;
+  margin: 8px 0;
+  font-size: 15px;
   border: none;
   border-radius: 10px;
   background: #ff69b4;
   color: white;
 }
 
-button:hover {
-  opacity: 0.9;
-}
-
-.hidden {
-  display: none;
+.small-btn {
+  background: #ddd;
+  color: #333;
 }
 
 .time-grid {
@@ -60,6 +49,8 @@ button:hover {
 .time-btn {
   background: #f06292;
 }
+
+.hidden { display: none; }
 
 .complete {
   font-size: 18px;
@@ -89,10 +80,16 @@ button:hover {
 
   <div class="time-grid">
     <button class="time-btn" onclick="complete('7/10 10:00')">7/10 10:00 ◯</button>
+    <button class="time-btn" onclick="complete('7/10 11:00')">7/10 11:00 ◯</button>
     <button class="time-btn" onclick="complete('7/10 12:00')">7/10 12:00 ◯</button>
+    <button class="time-btn" onclick="complete('7/10 13:00')">7/10 13:00 ◯</button>
     <button class="time-btn" onclick="complete('7/10 14:00')">7/10 14:00 ◯</button>
+    <button class="time-btn" onclick="complete('7/10 15:00')">7/10 15:00 ◯</button>
     <button class="time-btn" onclick="complete('7/10 16:00')">7/10 16:00 ◯</button>
+    <button class="time-btn" onclick="complete('7/10 17:00')">7/10 17:00 ◯</button>
   </div>
+
+  <button class="small-btn" onclick="backToMenu()">← 戻る</button>
 </div>
 
 <!-- 完了 -->
@@ -102,6 +99,8 @@ button:hover {
     現在仮予約となっております。<br>
     確認後ご連絡いたします。
   </div>
+
+  <button class="small-btn" onclick="reset()">トップに戻る</button>
 </div>
 
 </div>
@@ -116,6 +115,16 @@ function goCalendar(menu){
 function complete(time){
   document.getElementById("calendar").classList.add("hidden");
   document.getElementById("complete").classList.remove("hidden");
+}
+
+function backToMenu(){
+  document.getElementById("calendar").classList.add("hidden");
+  document.getElementById("menu").classList.remove("hidden");
+}
+
+function reset(){
+  document.getElementById("complete").classList.add("hidden");
+  document.getElementById("menu").classList.remove("hidden");
 }
 </script>
 
