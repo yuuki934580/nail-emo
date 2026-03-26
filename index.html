@@ -2,131 +2,384 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ネイル予約</title>
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>ネイルサロン｜仮予約</title>
 <style>
-body {
-  font-family: sans-serif;
-  background: #fff0f5;
-  text-align: center;
-  margin: 0;
-  padding: 20px;
+:root {
+  --rose:   #e8a4b8;
+  --rose-d: #cc7a96;
+  --rose-l: #fdf0f4;
+  --cream:  #fdfaf8;
+  --ink:    #2e1f27;
+  --muted:  #a08898;
+  --border: #eedde5;
+  --r:  16px;
+  --rs: 12px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{
+  font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif;
+  background:var(--cream);
+  color:var(--ink);
+  max-width:430px;
+  margin:0 auto;
+  min-height:100vh;
+  padding-bottom:48px;
 }
 
-h1 { font-size: 22px; margin-bottom: 5px; }
-.sub { color: #777; font-size: 14px; margin-bottom: 20px; }
-
-.card {
-  background: white;
-  border-radius: 15px;
-  padding: 20px;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+/* ===== HEADER ===== */
+.hd{
+  background:linear-gradient(135deg,var(--rose) 0%,var(--rose-d) 100%);
+  padding:22px 20px 18px;
+  position:relative;overflow:hidden;
 }
-
-button {
-  width: 90%;
-  padding: 14px;
-  margin: 8px 0;
-  font-size: 15px;
-  border: none;
-  border-radius: 10px;
-  background: #ff69b4;
-  color: white;
+.hd::before{
+  content:'';position:absolute;top:-40px;right:-30px;
+  width:120px;height:120px;
+  background:rgba(255,255,255,.1);border-radius:50%;
 }
+.hd-name{font-size:19px;font-weight:800;color:#fff;letter-spacing:.06em;position:relative;z-index:1;}
+.hd-sub{font-size:11px;color:rgba(255,255,255,.8);margin-top:3px;letter-spacing:.08em;position:relative;z-index:1;}
 
-.small-btn {
-  background: #ddd;
-  color: #333;
+/* ===== SCREEN ===== */
+.screen{display:none;}
+.screen.active{display:block;animation:up .25s ease;}
+@keyframes up{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+
+/* ===== SECTION ===== */
+.sec{padding:20px 16px 0;}
+.sec-title{
+  font-size:12px;font-weight:700;color:var(--muted);
+  letter-spacing:.07em;margin-bottom:12px;
+  display:flex;align-items:center;gap:6px;
 }
+.sec-title::before{content:'';display:block;width:3px;height:13px;background:var(--rose);border-radius:2px;}
 
-.time-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
+/* ===== MENU CARDS ===== */
+.menu-grid{display:flex;flex-direction:column;gap:9px;}
+.menu-card{
+  background:#fff;border:2px solid var(--border);border-radius:var(--r);
+  padding:15px 16px;
+  display:flex;align-items:center;justify-content:space-between;
+  cursor:pointer;transition:all .18s;
+  box-shadow:0 2px 10px rgba(232,164,184,.1);
+  -webkit-tap-highlight-color:transparent;
 }
-
-.time-btn {
-  background: #f06292;
+.menu-card:active{transform:scale(.97);}
+.menu-card.sel{border-color:var(--rose-d);background:var(--rose-l);box-shadow:0 4px 16px rgba(204,122,150,.2);}
+.mc-name{font-size:16px;font-weight:800;margin-bottom:3px;}
+.mc-meta{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:8px;}
+.menu-card.sel .mc-meta{color:var(--rose-d);}
+.mc-right{display:flex;flex-direction:column;align-items:flex-end;gap:5px;}
+.mc-price{font-size:18px;font-weight:800;color:var(--rose-d);}
+.mc-check{
+  width:22px;height:22px;border-radius:50%;
+  background:var(--border);
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;color:transparent;transition:all .18s;
 }
+.menu-card.sel .mc-check{background:var(--rose-d);color:#fff;}
+.tag{font-size:9px;font-weight:700;background:var(--rose-d);color:#fff;border-radius:4px;padding:2px 6px;}
 
-.hidden { display: none; }
+/* ===== DATE BUTTONS ===== */
+.date-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+.date-btn{
+  background:#fff;border:2px solid var(--border);border-radius:var(--rs);
+  padding:12px 4px;text-align:center;cursor:pointer;
+  transition:all .18s;-webkit-tap-highlight-color:transparent;
+}
+.date-btn:active{transform:scale(.95);}
+.date-btn.sel{border-color:var(--rose-d);background:var(--rose-l);}
+.db-lbl{font-size:10px;font-weight:600;color:var(--muted);display:block;margin-bottom:3px;}
+.db-date{font-size:14px;font-weight:800;display:block;}
+.date-btn.sel .db-lbl{color:var(--rose-d);}
 
-.complete {
-  font-size: 18px;
-  color: #333;
+.cal-wrap{margin-top:10px;display:none;}
+.cal-wrap.open{display:block;}
+.cal-input{
+  width:100%;padding:12px 14px;
+  border:2px solid var(--border);border-radius:var(--rs);
+  font-size:14px;font-family:inherit;background:#fff;color:var(--ink);
+  -webkit-appearance:none;
+}
+.cal-input:focus{outline:none;border-color:var(--rose);}
+
+/* ===== TIME BUTTONS ===== */
+.time-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.time-btn{
+  background:#fff;border:2px solid var(--border);border-radius:var(--rs);
+  padding:12px 4px;text-align:center;
+  cursor:pointer;font-size:14px;font-weight:800;
+  transition:all .18s;-webkit-tap-highlight-color:transparent;
+}
+.time-btn:active{transform:scale(.95);}
+.time-btn.sel{border-color:var(--rose-d);background:var(--rose-d);color:#fff;}
+
+/* ===== NOTE ===== */
+.note-area{
+  width:100%;padding:12px 14px;
+  border:2px solid var(--border);border-radius:var(--rs);
+  font-size:13px;font-family:inherit;background:#fff;color:var(--ink);
+  resize:none;height:64px;line-height:1.6;
+}
+.note-area:focus{outline:none;border-color:var(--rose);}
+
+/* ===== SUBMIT BUTTON ===== */
+.btn-main{
+  display:block;width:calc(100% - 32px);
+  margin:22px 16px 0;padding:16px;
+  background:linear-gradient(135deg,var(--rose) 0%,var(--rose-d) 100%);
+  color:#fff;border:none;border-radius:var(--r);
+  font-size:16px;font-weight:800;text-align:center;
+  cursor:pointer;
+  box-shadow:0 6px 20px rgba(204,122,150,.35);
+  transition:all .2s;letter-spacing:.05em;
+  -webkit-tap-highlight-color:transparent;
+}
+.btn-main:active{transform:scale(.97);}
+.btn-main:disabled{background:var(--border);color:var(--muted);box-shadow:none;cursor:not-allowed;}
+
+/* ===== ローディング ===== */
+.loading{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:70px 20px;gap:16px;
+}
+.spinner{
+  width:38px;height:38px;
+  border:3px solid var(--border);border-top-color:var(--rose-d);
+  border-radius:50%;animation:spin .7s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg);}}
+.loading-txt{font-size:13px;color:var(--muted);}
+
+/* ===== 完了画面 ===== */
+.done-wrap{
+  padding:60px 24px 0;
+  text-align:center;
+}
+.done-icon{font-size:54px;margin-bottom:16px;}
+.done-title{font-size:20px;font-weight:800;color:var(--rose-d);margin-bottom:16px;}
+.done-body{
+  font-size:16px;font-weight:700;
+  color:var(--ink);
+  line-height:2;
+  background:#fff;
+  border-radius:var(--r);
+  padding:20px;
+  box-shadow:0 2px 16px rgba(232,164,184,.15);
+}
+.done-note{
+  margin-top:20px;
+  font-size:11px;color:var(--muted);
+  line-height:1.8;
 }
 </style>
 </head>
-
 <body>
 
-<h1>ネイル予約</h1>
-<div class="sub">LINEで簡単に予約できます</div>
-
-<div class="card">
-
-<!-- メニュー -->
-<div id="menu">
-  <h3>メニューを選択</h3>
-  <button onclick="goCalendar('ワンカラー')">ワンカラー</button>
-  <button onclick="goCalendar('デザイン')">デザイン</button>
+<!-- HEADER -->
+<div class="hd">
+  <div class="hd-name">💅 ネイルサロン</div>
+  <div class="hd-sub">LINE予約</div>
 </div>
 
-<!-- カレンダー -->
-<div id="calendar" class="hidden">
-  <h3 id="selectedMenu"></h3>
-  <p>日時を選択してください</p>
+<!-- SCREEN 1: 選択フォーム -->
+<div class="screen active" id="sc1">
 
-  <div class="time-grid">
-    <button class="time-btn" onclick="complete('7/10 10:00')">7/10 10:00 ◯</button>
-    <button class="time-btn" onclick="complete('7/10 11:00')">7/10 11:00 ◯</button>
-    <button class="time-btn" onclick="complete('7/10 12:00')">7/10 12:00 ◯</button>
-    <button class="time-btn" onclick="complete('7/10 13:00')">7/10 13:00 ◯</button>
-    <button class="time-btn" onclick="complete('7/10 14:00')">7/10 14:00 ◯</button>
-    <button class="time-btn" onclick="complete('7/10 15:00')">7/10 15:00 ◯</button>
-    <button class="time-btn" onclick="complete('7/10 16:00')">7/10 16:00 ◯</button>
-    <button class="time-btn" onclick="complete('7/10 17:00')">7/10 17:00 ◯</button>
+  <div class="sec">
+    <div class="sec-title">メニューを選ぶ</div>
+    <div class="menu-grid">
+      <div class="menu-card" data-menu="ジェルネイル" data-min="60" data-price="¥5,000" onclick="selMenu(this)">
+        <div><div class="mc-name">ジェルネイル</div><div class="mc-meta"><span>⏱ 60分</span><span class="tag">人気No.1</span></div></div>
+        <div class="mc-right"><div class="mc-price">¥5,000</div><div class="mc-check">✓</div></div>
+      </div>
+      <div class="menu-card" data-menu="ジェル＋オフあり" data-min="90" data-price="¥6,500" onclick="selMenu(this)">
+        <div><div class="mc-name">ジェル＋オフあり</div><div class="mc-meta"><span>⏱ 90分</span></div></div>
+        <div class="mc-right"><div class="mc-price">¥6,500</div><div class="mc-check">✓</div></div>
+      </div>
+      <div class="menu-card" data-menu="スカルプ" data-min="120" data-price="¥9,000" onclick="selMenu(this)">
+        <div><div class="mc-name">スカルプ</div><div class="mc-meta"><span>⏱ 120分</span><span class="tag">本格派</span></div></div>
+        <div class="mc-right"><div class="mc-price">¥9,000</div><div class="mc-check">✓</div></div>
+      </div>
+      <div class="menu-card" data-menu="オフのみ" data-min="30" data-price="¥2,000" onclick="selMenu(this)">
+        <div><div class="mc-name">オフのみ</div><div class="mc-meta"><span>⏱ 30分</span></div></div>
+        <div class="mc-right"><div class="mc-price">¥2,000</div><div class="mc-check">✓</div></div>
+      </div>
+    </div>
   </div>
 
-  <button class="small-btn" onclick="backToMenu()">← 戻る</button>
-</div>
-
-<!-- 完了 -->
-<div id="complete" class="hidden">
-  <div class="complete">
-    予約を受け付けました 💅<br><br>
-    現在仮予約となっております。<br>
-    確認後ご連絡いたします。
+  <div class="sec">
+    <div class="sec-title">日付を選ぶ</div>
+    <div class="date-row" id="date-row"></div>
+    <div class="cal-wrap" id="cal-wrap">
+      <input type="date" class="cal-input" id="cal-input" onchange="selCalDate(this.value)">
+    </div>
   </div>
 
-  <button class="small-btn" onclick="reset()">トップに戻る</button>
-</div>
+  <div class="sec">
+    <div class="sec-title">時間を選ぶ</div>
+    <div class="time-grid" id="time-grid"></div>
+  </div>
 
-</div>
+  <div class="sec">
+    <div class="sec-title">備考（任意）</div>
+    <textarea class="note-area" id="f-note" placeholder="デザイン希望・アレルギーなど"></textarea>
+  </div>
+
+  <button class="btn-main" id="btn-submit" disabled onclick="doSubmit()">予約する　→</button>
+
+</div><!-- /sc1 -->
+
+<!-- SCREEN 2: 完了 -->
+<div class="screen" id="sc2">
+  <div class="loading" id="loading">
+    <div class="spinner"></div>
+    <div class="loading-txt" id="loading-txt">送信中…</div>
+  </div>
+  <div id="done" style="display:none;">
+    <div class="done-wrap">
+      <div class="done-icon">💅</div>
+      <div class="done-title">予約を受け付けました</div>
+      <div class="done-body" id="done-body"></div>
+      <div class="done-note">確認のご連絡をLINEにてお送りします<br><span style="font-size:10px;">※最終確定は店舗側で調整させていただきます</span></div>
+    </div>
+  </div>
+</div><!-- /sc2 -->
 
 <script>
-function goCalendar(menu){
-  document.getElementById("menu").classList.add("hidden");
-  document.getElementById("calendar").classList.remove("hidden");
-  document.getElementById("selectedMenu").innerText = menu;
+// ===== MODE設定 =====
+// "hybrid" : 他サービス併用前提（status: pending）
+// "full"   : 自社予約のみ（status: confirmed）
+const MODE = "hybrid";
+
+let selMenuName='', selMenuMin=0, selMenuPrice='';
+let selDate='', selDateLabel='', selTime='';
+
+// 日付ボタン生成
+function buildDateBtns() {
+  const row  = document.getElementById('date-row');
+  const days = ['日','月','火','水','木','金','土'];
+  const lbls = ['今日','明日','明後日'];
+  for (let i = 0; i < 3; i++) {
+    const d  = new Date();
+    d.setDate(d.getDate() + i);
+    const mm = d.getMonth() + 1, dd = d.getDate();
+    const ds = `${d.getFullYear()}-${String(mm).padStart(2,'0')}-${String(dd).padStart(2,'0')}`;
+    const btn = document.createElement('div');
+    btn.className = 'date-btn';
+    btn.dataset.date  = ds;
+    btn.dataset.label = `${mm}/${dd}（${days[d.getDay()]}）`;
+    btn.innerHTML = `<span class="db-lbl">${lbls[i]}</span><span class="db-date">${mm}/${dd}</span>`;
+    btn.onclick = () => selDateBtn(btn);
+    row.appendChild(btn);
+  }
+  const cal = document.createElement('div');
+  cal.className = 'date-btn'; cal.id = 'cal-btn';
+  cal.innerHTML = `<span class="db-lbl">その他</span><span class="db-date" style="font-size:18px;">📅</span>`;
+  cal.onclick = toggleCal;
+  row.appendChild(cal);
 }
 
-function complete(time){
-  document.getElementById("calendar").classList.add("hidden");
-  document.getElementById("complete").classList.remove("hidden");
+function selDateBtn(el) {
+  document.querySelectorAll('.date-btn').forEach(b => b.classList.remove('sel'));
+  el.classList.add('sel');
+  selDate = el.dataset.date; selDateLabel = el.dataset.label;
+  document.getElementById('cal-wrap').classList.remove('open');
+  checkReady();
+}
+function toggleCal() {
+  document.querySelectorAll('.date-btn').forEach(b => b.classList.remove('sel'));
+  document.getElementById('cal-btn').classList.add('sel');
+  document.getElementById('cal-wrap').classList.toggle('open');
+}
+function selCalDate(val) {
+  if (!val) return;
+  const d = new Date(val + 'T00:00:00');
+  const days = ['日','月','火','水','木','金','土'];
+  selDate = val;
+  selDateLabel = `${d.getMonth()+1}/${d.getDate()}（${days[d.getDay()]}）`;
+  checkReady();
 }
 
-function backToMenu(){
-  document.getElementById("calendar").classList.add("hidden");
-  document.getElementById("menu").classList.remove("hidden");
+// 時間ボタン生成（30分単位）
+function buildTimeBtns() {
+  const grid  = document.getElementById('time-grid');
+  const times = [
+    '10:00','10:30',
+    '11:00','11:30',
+    '12:00','12:30',
+    '13:00','13:30',
+    '14:00','14:30',
+    '15:00','15:30',
+    '16:00','16:30',
+    '17:00','17:30',
+    '18:00'
+  ];
+  times.forEach(t => {
+    const btn = document.createElement('div');
+    btn.className = 'time-btn';
+    btn.textContent = t;
+    btn.onclick = () => {
+      document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('sel'));
+      btn.classList.add('sel');
+      selTime = t;
+      checkReady();
+    };
+    grid.appendChild(btn);
+  });
 }
 
-function reset(){
-  document.getElementById("complete").classList.add("hidden");
-  document.getElementById("menu").classList.remove("hidden");
+function selMenu(el) {
+  document.querySelectorAll('.menu-card').forEach(c => c.classList.remove('sel'));
+  el.classList.add('sel');
+  selMenuName  = el.dataset.menu;
+  selMenuMin   = parseInt(el.dataset.min);
+  selMenuPrice = el.dataset.price;
+  checkReady();
 }
+
+function checkReady() {
+  document.getElementById('btn-submit').disabled = !(selMenuName && selDate && selTime);
+}
+
+function doSubmit() {
+  // 画面切替
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('sc2').classList.add('active');
+  window.scrollTo(0, 0);
+
+  // ローディング演出
+  const msgs = ['送信中…', '受付処理中…', '完了！'];
+  let i = 0;
+  const iv = setInterval(() => {
+    i++;
+    if (i < msgs.length) {
+      document.getElementById('loading-txt').textContent = msgs[i];
+    } else {
+      clearInterval(iv);
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('done').style.display = 'block';
+      document.getElementById('done-body').innerHTML =
+        `${selDateLabel}&nbsp;&nbsp;${selTime}<br>${selMenuName}（${selMenuMin}分）`;
+
+      // ===== localStorageに保存（admin.htmlと連携）=====
+      const existing = JSON.parse(localStorage.getItem('reservations') || '[]');
+      existing.unshift({
+        id:       Date.now(),
+        menu:     selMenuName,
+        date:     selDate,           // "2026-03-26" 形式そのまま保存
+        time:     selTime,
+        duration: `${selMenuMin}分`,
+        note:     document.getElementById('f-note').value.trim(),
+        status:   MODE === 'full' ? 'confirmed' : 'pending'
+      });
+      localStorage.setItem('reservations', JSON.stringify(existing));
+    }
+  }, 850);
+}
+
+buildDateBtns();
+buildTimeBtns();
 </script>
-
 </body>
 </html>
