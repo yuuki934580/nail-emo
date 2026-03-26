@@ -3,46 +3,114 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ネイル予約デモ</title>
+<title>ネイル予約</title>
+
 <style>
-body { font-family: sans-serif; text-align: center; padding: 20px; }
-button { padding: 15px; margin: 10px; font-size: 18px; width: 80%; }
-.hidden { display: none; }
-.calendar button { width: 30%; }
+body {
+  font-family: sans-serif;
+  background: #fff0f5;
+  text-align: center;
+  margin: 0;
+  padding: 20px;
+}
+
+h1 {
+  font-size: 22px;
+  margin-bottom: 5px;
+}
+
+.sub {
+  color: #777;
+  font-size: 14px;
+  margin-bottom: 20px;
+}
+
+.card {
+  background: white;
+  border-radius: 15px;
+  padding: 20px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+button {
+  width: 90%;
+  padding: 15px;
+  margin: 10px 0;
+  font-size: 16px;
+  border: none;
+  border-radius: 10px;
+  background: #ff69b4;
+  color: white;
+}
+
+button:hover {
+  opacity: 0.9;
+}
+
+.hidden {
+  display: none;
+}
+
+.time-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.time-btn {
+  background: #f06292;
+}
+
+.complete {
+  font-size: 18px;
+  color: #333;
+}
 </style>
 </head>
 
 <body>
 
-<h2 id="title">メニューを選択</h2>
+<h1>ネイル予約</h1>
+<div class="sub">LINEで簡単に予約できます</div>
+
+<div class="card">
 
 <!-- メニュー -->
 <div id="menu">
+  <h3>メニューを選択</h3>
   <button onclick="goCalendar('ワンカラー')">ワンカラー</button>
   <button onclick="goCalendar('デザイン')">デザイン</button>
 </div>
 
 <!-- カレンダー -->
 <div id="calendar" class="hidden">
-  <h3>日時を選択</h3>
-  <div class="calendar">
-    <button onclick="complete('10:00')">10:00 ◯</button>
-    <button onclick="complete('11:00')">11:00 ◯</button>
-    <button onclick="complete('12:00')">12:00 ◯</button>
+  <h3 id="selectedMenu"></h3>
+  <p>日時を選択してください</p>
+
+  <div class="time-grid">
+    <button class="time-btn" onclick="complete('7/10 10:00')">7/10 10:00 ◯</button>
+    <button class="time-btn" onclick="complete('7/10 12:00')">7/10 12:00 ◯</button>
+    <button class="time-btn" onclick="complete('7/10 14:00')">7/10 14:00 ◯</button>
+    <button class="time-btn" onclick="complete('7/10 16:00')">7/10 16:00 ◯</button>
   </div>
 </div>
 
 <!-- 完了 -->
 <div id="complete" class="hidden">
-  <h3>予約を受け付けました</h3>
-  <p>現在仮予約となっております。<br>確認後ご連絡いたします。</p>
+  <div class="complete">
+    予約を受け付けました 💅<br><br>
+    現在仮予約となっております。<br>
+    確認後ご連絡いたします。
+  </div>
+</div>
+
 </div>
 
 <script>
 function goCalendar(menu){
   document.getElementById("menu").classList.add("hidden");
   document.getElementById("calendar").classList.remove("hidden");
-  document.getElementById("title").innerText = menu + " を選択中";
+  document.getElementById("selectedMenu").innerText = menu;
 }
 
 function complete(time){
