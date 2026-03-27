@@ -486,6 +486,7 @@ body{
             <div class="tmpl-base-label">⏳ 未確定時の返信</div>
             <textarea class="tmpl-textarea" id="tmpl-pending"></textarea>
             <div class="tmpl-base-actions">
+              <button class="del-btn" onclick="clearTmpl('tmpl-pending')" title="消去">×</button>
               <button class="tmpl-copy-btn" onclick="copyTmpl('tmpl-pending')">📋 コピー</button>
               <button class="add-btn" style="width:auto;padding:8px 16px;" onclick="saveTmplBase()">保存</button>
             </div>
@@ -495,6 +496,7 @@ body{
             <div class="tmpl-base-label">✅ 確定時の返信</div>
             <textarea class="tmpl-textarea" id="tmpl-confirmed"></textarea>
             <div class="tmpl-base-actions">
+              <button class="del-btn" onclick="clearTmpl('tmpl-confirmed')" title="消去">×</button>
               <button class="tmpl-copy-btn" onclick="copyTmpl('tmpl-confirmed')">📋 コピー</button>
               <button class="add-btn" style="width:auto;padding:8px 16px;" onclick="saveTmplBase()">保存</button>
             </div>
@@ -908,11 +910,12 @@ const DEFAULT_TEMPLATES = {
 
 function loadTemplates() {
   const raw = localStorage.getItem('templates');
-  const data = raw ? JSON.parse(raw) : { ...DEFAULT_TEMPLATES };
-  // 基本テンプレは常に最新の文言を使う（管理者が編集していない場合）
-  if (!raw) {
-    localStorage.setItem('templates', JSON.stringify(data));
-  }
+  const data = raw ? JSON.parse(raw) : {};
+  // 基本テンプレは常にDEFAULTで上書き（管理者が編集した場合は保持しない）
+  data.pendingMessage   = DEFAULT_TEMPLATES.pendingMessage;
+  data.confirmedMessage = DEFAULT_TEMPLATES.confirmedMessage;
+  if (!data.customTemplates) data.customTemplates = [];
+  localStorage.setItem('templates', JSON.stringify(data));
   return data;
 }
 function saveTemplates(data) {
@@ -943,6 +946,10 @@ function renderTemplates() {
       <div class="custom-tmpl-body">${t.body}</div>
     </div>
   `).join('');
+}
+
+function clearTmpl(elId) {
+  document.getElementById(elId).value = '';
 }
 
 function saveTmplBase() {
