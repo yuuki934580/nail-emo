@@ -308,6 +308,21 @@ body{
   padding:0 16px 14px;white-space:pre-wrap;
 }
 
+.line-open-btn{
+  display:inline-flex;align-items:center;gap:8px;
+  background:#06c755;color:#fff;
+  border-radius:var(--rs);padding:11px 20px;
+  font-size:14px;font-weight:800;
+  text-decoration:none;letter-spacing:.04em;
+  transition:opacity .15s;
+}
+.line-open-btn:hover{opacity:.85;}
+.line-open-icon{
+  width:20px;height:20px;background:#fff;
+  border-radius:4px;display:flex;align-items:center;justify-content:center;
+  font-size:12px;color:#06c755;font-weight:900;flex-shrink:0;
+}
+
 /* ===== 過去予約トグル ===== */
 .past-toggle{
   display:flex;justify-content:space-between;align-items:center;
@@ -483,6 +498,14 @@ body{
               <button class="tmpl-copy-btn" onclick="copyTmpl('tmpl-confirmed')">📋 コピー</button>
               <button class="add-btn" style="width:auto;padding:8px 16px;" onclick="saveTmplBase()">保存</button>
             </div>
+          </div>
+          <div class="divider"></div>
+          <!-- LINEを開くボタン -->
+          <div style="padding:14px 16px;">
+            <a href="https://line.me/R/nv/chat" target="_blank" class="line-open-btn">
+              <span class="line-open-icon">L</span>
+              LINEを開く
+            </a>
           </div>
         </div>
       </div>
@@ -876,22 +899,21 @@ function delCoupon(id) {
 const DEFAULT_TEMPLATES = {
   pendingMessage:
 `ご予約ありがとうございます💅
-○月○日 ○時 の【メニュー名】で承りました。
-確認が取れましたらあらためてご連絡いたします。
-少々お待ちください🙏`,
+内容を確認後、改めてご連絡いたします。`,
   confirmedMessage:
-`ご予約の確定をお知らせいたします✅
-○月○日 ○時 【メニュー名】
-こちらで確定となります。
-当日お気をつけてお越しください💅`,
+`ご予約ありがとうございます💅
+ご予約が確定しました。ご来店お待ちしております。`,
   customTemplates: []
 };
 
 function loadTemplates() {
   const raw = localStorage.getItem('templates');
-  if (raw) return JSON.parse(raw);
-  localStorage.setItem('templates', JSON.stringify(DEFAULT_TEMPLATES));
-  return { ...DEFAULT_TEMPLATES };
+  const data = raw ? JSON.parse(raw) : { ...DEFAULT_TEMPLATES };
+  // 基本テンプレは常に最新の文言を使う（管理者が編集していない場合）
+  if (!raw) {
+    localStorage.setItem('templates', JSON.stringify(data));
+  }
+  return data;
 }
 function saveTemplates(data) {
   localStorage.setItem('templates', JSON.stringify(data));
