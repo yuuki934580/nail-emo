@@ -268,6 +268,46 @@ body{
 }
 .toggle input:checked ~ .toggle-thumb{transform:translateX(20px);}
 
+/* ===== 返信テンプレ ===== */
+.tmpl-base-row{padding:14px 16px;}
+.tmpl-base-label{
+  font-size:12px;font-weight:700;color:var(--muted);
+  margin-bottom:8px;letter-spacing:.04em;
+}
+.tmpl-textarea{
+  width:100%;padding:10px 12px;
+  border:2px solid var(--border);border-radius:var(--rs);
+  font-size:13px;font-family:inherit;color:var(--ink);
+  background:#fff;resize:vertical;min-height:90px;line-height:1.7;
+}
+.tmpl-textarea:focus{outline:none;border-color:var(--rose);}
+.tmpl-base-actions{
+  display:flex;justify-content:flex-end;gap:8px;margin-top:8px;
+}
+.tmpl-copy-btn{
+  padding:8px 14px;border-radius:var(--rs);border:2px solid var(--border);
+  background:#fff;font-size:12px;font-weight:700;color:var(--muted);
+  cursor:pointer;transition:all .15s;
+  -webkit-tap-highlight-color:transparent;
+}
+.tmpl-copy-btn:hover{border-color:var(--rose);color:var(--rose-d);}
+.tmpl-copy-btn.copied{border-color:var(--green);color:var(--green);background:var(--green-l);}
+.custom-tmpl-card{
+  background:#fff;border-radius:var(--r);
+  box-shadow:0 2px 12px rgba(58,42,48,.07);
+  margin-bottom:10px;overflow:hidden;
+}
+.custom-tmpl-head{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 16px 8px;
+}
+.custom-tmpl-title{font-size:13px;font-weight:800;}
+.custom-tmpl-acts{display:flex;gap:6px;}
+.custom-tmpl-body{
+  font-size:12px;color:var(--muted);line-height:1.7;
+  padding:0 16px 14px;white-space:pre-wrap;
+}
+
 /* ===== 過去予約トグル ===== */
 .past-toggle{
   display:flex;justify-content:space-between;align-items:center;
@@ -323,6 +363,7 @@ body{
   <button class="nav-btn active" onclick="switchTab('reserve',this)">📋 予約一覧</button>
   <button class="nav-btn" onclick="switchTab('menu',this)">🍽 メニュー管理</button>
   <button class="nav-btn" onclick="switchTab('coupon',this)">🎁 クーポン管理</button>
+  <button class="nav-btn" onclick="switchTab('template',this)">💬 返信テンプレ</button>
 </div>
 
 <!-- PC用2カラム -->
@@ -333,6 +374,7 @@ body{
     <button class="sidebar-btn active" onclick="switchTab('reserve',this)">📋 予約一覧</button>
     <button class="sidebar-btn" onclick="switchTab('menu',this)">🍽 メニュー管理</button>
     <button class="sidebar-btn" onclick="switchTab('coupon',this)">🎁 クーポン管理</button>
+    <button class="sidebar-btn" onclick="switchTab('template',this)">💬 返信テンプレ</button>
   </div>
 
   <!-- メインエリア -->
@@ -414,6 +456,47 @@ body{
               <input class="add-input" id="new-coupon-detail" placeholder="説明（例：お友達紹介のお客様に適用）">
             </div>
             <button class="add-btn" onclick="addCoupon()">追加する</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: 返信テンプレ -->
+    <div class="tab" id="tab-template">
+      <!-- 基本テンプレ -->
+      <div class="sec">
+        <div class="sec-hd"><div class="sec-title">基本テンプレ</div></div>
+        <div class="card">
+          <div class="tmpl-base-row">
+            <div class="tmpl-base-label">⏳ 未確定時の返信</div>
+            <textarea class="tmpl-textarea" id="tmpl-pending"></textarea>
+            <div class="tmpl-base-actions">
+              <button class="tmpl-copy-btn" onclick="copyTmpl('tmpl-pending')">📋 コピー</button>
+              <button class="add-btn" style="width:auto;padding:8px 16px;" onclick="saveTmplBase()">保存</button>
+            </div>
+          </div>
+          <div class="divider"></div>
+          <div class="tmpl-base-row">
+            <div class="tmpl-base-label">✅ 確定時の返信</div>
+            <textarea class="tmpl-textarea" id="tmpl-confirmed"></textarea>
+            <div class="tmpl-base-actions">
+              <button class="tmpl-copy-btn" onclick="copyTmpl('tmpl-confirmed')">📋 コピー</button>
+              <button class="add-btn" style="width:auto;padding:8px 16px;" onclick="saveTmplBase()">保存</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- カスタムテンプレ -->
+      <div class="sec" style="margin-top:4px;">
+        <div class="sec-hd"><div class="sec-title">カスタムテンプレ</div></div>
+        <div id="custom-tmpl-list"></div>
+        <div class="card">
+          <div class="add-form">
+            <div class="add-form-title">＋ テンプレを追加</div>
+            <input class="add-input" id="new-tmpl-title" placeholder="タイトル（例：キャンセル案内）" style="width:100%;margin-bottom:8px;">
+            <textarea class="tmpl-textarea" id="new-tmpl-body" placeholder="返信文を入力…" style="height:80px;"></textarea>
+            <button class="add-btn" onclick="addCustomTmpl()" style="margin-top:8px;">追加する</button>
           </div>
         </div>
       </div>
@@ -789,6 +872,107 @@ function delCoupon(id) {
   if (i !== -1) { coupons.splice(i,1); save('coupons',coupons); renderCoupons(); }
 }
 
+// ===== 返信テンプレ =====
+const DEFAULT_TEMPLATES = {
+  pendingMessage:
+`ご予約ありがとうございます💅
+○月○日 ○時 の【メニュー名】で承りました。
+確認が取れましたらあらためてご連絡いたします。
+少々お待ちください🙏`,
+  confirmedMessage:
+`ご予約の確定をお知らせいたします✅
+○月○日 ○時 【メニュー名】
+こちらで確定となります。
+当日お気をつけてお越しください💅`,
+  customTemplates: []
+};
+
+function loadTemplates() {
+  const raw = localStorage.getItem('templates');
+  if (raw) return JSON.parse(raw);
+  localStorage.setItem('templates', JSON.stringify(DEFAULT_TEMPLATES));
+  return { ...DEFAULT_TEMPLATES };
+}
+function saveTemplates(data) {
+  localStorage.setItem('templates', JSON.stringify(data));
+}
+
+let templates = loadTemplates();
+
+function renderTemplates() {
+  // 基本テンプレをテキストエリアに反映
+  document.getElementById('tmpl-pending').value   = templates.pendingMessage   || '';
+  document.getElementById('tmpl-confirmed').value = templates.confirmedMessage || '';
+  // カスタムテンプレ一覧
+  const list = document.getElementById('custom-tmpl-list');
+  if (!templates.customTemplates.length) {
+    list.innerHTML = '<div class="empty" style="padding:12px 0;">カスタムテンプレはまだありません</div>';
+    return;
+  }
+  list.innerHTML = templates.customTemplates.map(t => `
+    <div class="custom-tmpl-card">
+      <div class="custom-tmpl-head">
+        <div class="custom-tmpl-title">${t.title}</div>
+        <div class="custom-tmpl-acts">
+          <button class="tmpl-copy-btn" id="copy-${t.id}" onclick="copyCustomTmpl(${t.id})">📋 コピー</button>
+          <button class="del-btn" onclick="delCustomTmpl(${t.id})">×</button>
+        </div>
+      </div>
+      <div class="custom-tmpl-body">${t.body}</div>
+    </div>
+  `).join('');
+}
+
+function saveTmplBase() {
+  templates.pendingMessage   = document.getElementById('tmpl-pending').value;
+  templates.confirmedMessage = document.getElementById('tmpl-confirmed').value;
+  saveTemplates(templates);
+  // 保存フィードバック
+  const btn = event.currentTarget;
+  const orig = btn.textContent;
+  btn.textContent = '✅ 保存済';
+  setTimeout(() => { btn.textContent = orig; }, 1200);
+}
+
+function addCustomTmpl() {
+  const title = document.getElementById('new-tmpl-title').value.trim();
+  const body  = document.getElementById('new-tmpl-body').value.trim();
+  if (!title || !body) { alert('タイトルと返信文を入力してください'); return; }
+  templates.customTemplates.push({ id: Date.now(), title, body });
+  saveTemplates(templates);
+  document.getElementById('new-tmpl-title').value = '';
+  document.getElementById('new-tmpl-body').value  = '';
+  renderTemplates();
+}
+
+function delCustomTmpl(id) {
+  templates.customTemplates = templates.customTemplates.filter(t=>t.id!==id);
+  saveTemplates(templates);
+  renderTemplates();
+}
+
+function copyTmpl(elId) {
+  const text = document.getElementById(elId).value;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = event.currentTarget;
+    btn.textContent = '✅ コピー済';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = '📋 コピー'; btn.classList.remove('copied'); }, 1500);
+  });
+}
+
+function copyCustomTmpl(id) {
+  const t = templates.customTemplates.find(t=>t.id===id);
+  if (!t) return;
+  navigator.clipboard.writeText(t.body).then(() => {
+    const btn = document.getElementById('copy-'+id);
+    if (!btn) return;
+    btn.textContent = '✅ コピー済';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = '📋 コピー'; btn.classList.remove('copied'); }, 1500);
+  });
+}
+
 // ===== タブ切替 =====
 function switchTab(id, btn) {
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
@@ -806,6 +990,7 @@ function switchTab(id, btn) {
 renderReserves();
 renderMenus();
 renderCoupons();
+renderTemplates();
 </script>
 </body>
 </html>
